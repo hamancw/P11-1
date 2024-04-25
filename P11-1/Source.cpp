@@ -1,92 +1,118 @@
 #include <iostream>
-#include <iomanip>
+#include <string>
 
 using namespace std;
 
-const int ROWS = 12; // Number of rows in the plane
-const int COLS = 5;  // Number of seats in each row
-
-// Function prototypes
 int findRowIndex(int thisRow);
 int findSeatIndex(char thisSeat);
-void displaySeatColumn(char seats[][COLS], int column);
+const int ROWS = 13;
+void displaySeatColumn(char seats[][ROWS], int column);
 
 int main() {
-    // Initialize the seating chart
-    char seats[ROWS][COLS];
-    for (int i = 0; i < ROWS; ++i) {
-        for (int j = 0; j < COLS; ++j) {
-            seats[i][j] = 'O';
-        }
-    }
 
-    // Display initial seating chart
-    cout << "Initial seating chart:" << endl;
-    for (int col = 0; col < COLS; ++col) {
-        cout << "Column " << static_cast<char>('A' + col) << ": ";
-        displaySeatColumn(seats, col);
-        cout << endl;
-    }
+	string seatCode;
+	int rowNumber;
+	char seatLetter;
+	char seatingRegister[6][13] =
+	{
+	{'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D', ' '},
+	{'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', ' '},
+	{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '1', '1', '1', '1'},
+	{'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3'},
+	{'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B'},
+	{'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A'}
+	};
 
-    // Looping the seat reservation
-    int totalSeats = ROWS * COLS;
-    int seatsReserved = 0;
-    while (seatsReserved < totalSeats) {
-        // Get user input
-        int row;
-        char seat;
-        cout << "Enter seat number: ";
-        cin >> row >> seat;
-        cout << endl;
+	displaySeatColumn(seatingRegister, 1);
 
-        // Check for valid input
-        if (row < 1 || row > ROWS || seat < 'A' || seat >= 'A' + COLS) {
-            cout << "Sorry, no such seat exists on the CRJ 200." << endl;
-            cout << endl;
-            continue;
-        }
+	cout << "\nEnter a seat or Q to quit: ";
+	cin >> seatCode;
 
-        // Check if the seat is already reserved
-        if (seats[row - 1][seat - 'A'] == 'X') {
-            cout << "Seat " << row << seat << " is already reserved. Please choose another seat." << endl;
-            cout << endl;
-            continue;
-        }
+	do
+	{
 
-        // Reserve the seat
-        seats[row - 1][seat - 'A'] = 'X';
-        ++seatsReserved;
+		if (seatCode == "q" || seatCode == "Q")
+		{
+			break;
+		}
 
-        // Display updated seating chart
-        cout << "Updated seating chart:" << endl;
-        for (int col = 0; col < COLS; ++col) {
-            cout << "Column " << static_cast<char>('A' + col) << ": ";
-            displaySeatColumn(seats, col);
-            cout << endl;
-        }
+		char seatCodeChar1 = seatCode[0];
+		char seatCodeChar2 = seatCode[1];
+		char seatCodeChar3 = seatCode[2];
 
-        // Check if all seats are filled
-        if (seatsReserved == totalSeats) {
-            cout << "All seats are filled." << endl;
-            cout << endl;
-            break;
-        }
-    }
+		if (isdigit(seatCodeChar1) && isdigit(seatCodeChar2))
+			rowNumber = stoi(seatCode.substr(0, 2));
+		else if (isdigit(seatCodeChar1))
+			rowNumber = stoi(seatCode.substr(0, 1));
+
+		if (isalpha(seatCodeChar2))
+			seatLetter = seatCodeChar2;
+		else if (isalpha(seatCodeChar3))
+			seatLetter = seatCodeChar3;
+
+		if (findSeatIndex(seatLetter) == 13 || findRowIndex(rowNumber) > 12)
+		{
+			cout << "\nThat is not a proper seat index.\n";
+		}
+		else if (seatingRegister[findSeatIndex(seatLetter)][findRowIndex(rowNumber)] == 'X')
+		{
+			cout << "\nThat seat is already taken.\n";
+		}
+		else if (findRowIndex(rowNumber) == 12 && findSeatIndex(seatLetter) == 0 || findRowIndex(rowNumber) == 12 && findSeatIndex(seatLetter) == 1)
+		{
+			cout << "\nThat is not a proper seat index.\n";
+		}
+		else if (findSeatIndex(seatLetter) != 13 && findRowIndex(rowNumber) < 13 && seatingRegister[findSeatIndex(seatLetter)][findRowIndex(rowNumber)] != 'X')
+		{
+			seatingRegister[findSeatIndex(seatLetter)][findRowIndex(rowNumber)] = 'X';
+		}
+
+		displaySeatColumn(seatingRegister, 1);
+
+		cout << "\nEnter a seat or Q to quit: ";
+		cin >> seatCode;
+
+	} while (true);
+
+
 }
 
-// Find row function
-int findRowIndex(int thisRow) {
-    return thisRow - 1;
+int findRowIndex(int thisRow)
+{
+	return --thisRow;
 }
 
-// Find seat function
-int findSeatIndex(char thisSeat) {
-    return thisSeat - 'A';
+int findSeatIndex(char thisSeat)
+{
+	switch (thisSeat)
+	{
+	case 'D':
+		return 0;
+	case 'C':
+		return 1;
+	case 'B':
+		return 4;
+	case 'A':
+		return 5;
+	default:
+		return 13;
+	}
 }
 
-// Display a column of seats
-void displaySeatColumn(char seats[][COLS], int column) {
-    for (int row = 0; row < ROWS; ++row) {
-        cout << setw(3) << seats[row][column];
-    }
+void displaySeatColumn(char seats[][ROWS], int column)
+{
+
+	cout << endl;
+
+	for (int i = 0; i < 6; i++)
+	{
+		if (i == 2 || i == 4)
+			cout << endl;
+		for (int j = 0; j < 13; j++)
+		{
+			cout << seats[i][j] << " ";
+		}
+
+		cout << endl;
+	}
 }
